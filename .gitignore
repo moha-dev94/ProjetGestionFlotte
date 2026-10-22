@@ -1,0 +1,8 @@
+# Réglages locaux de l'éditeur / de Claude
+.claude/
+.vscode/
+.idea/
+
+# Système
+.DS_Store
+Thumbs.db

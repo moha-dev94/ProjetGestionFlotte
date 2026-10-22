@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Touge Fleet — Gestion de flotte pour agences de location</title>
+  <meta name="description" content="Touge Fleet : le logiciel de gestion de flotte automobile pensé pour les agences de location. Disponibilités, réservations, entretiens et kilométrage en temps réel.">
+
+  <!-- Polices -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+JP:wght@900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Styles : variables + base → composants → sections -->
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="stylesheet" href="assets/css/sections.css">
+
+  <script src="assets/js/main.js" defer></script>
+</head>
+<body>
+
+  <!-- ============ EN-TÊTE ============ -->
+  <header class="header" id="top">
+    <div class="container header__inner">
+      <a href="#top" class="logo" aria-label="Touge Fleet, retour en haut">
+        <span class="logo__kanji" aria-hidden="true">峠</span>
+        <span class="logo__text">Touge<em>Fleet</em></span>
+      </a>
+
+      <button class="nav-toggle" aria-expanded="false" aria-controls="nav" aria-label="Ouvrir le menu">
+        <span></span><span></span><span></span>
+      </button>
+
+      <nav class="nav" id="nav">
+        <a href="#features">Fonctionnalités</a>
+        <a href="#dashboard">Le tableau de bord</a>
+        <a href="#steps">Démarrage</a>
+        <a href="#pricing">Tarifs</a>
+        <a href="#contact" class="btn btn--primary btn--sm">Demander une démo</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ============ HERO ============ -->
+    <section class="hero">
+      <div class="hero__bg" aria-hidden="true">
+        <!-- Col de montagne de nuit : montagnes, route sinueuse, traînée de phares -->
+        <svg class="hero__scene" viewBox="0 0 1440 800" preserveAspectRatio="xMidYMax slice">
+          <circle class="hero__moon" cx="1130" cy="170" r="70"/>
+          <path class="hero__mountain hero__mountain--far" d="M0 520 L180 330 L330 450 L520 250 L700 430 L880 290 L1060 460 L1250 300 L1440 420 L1440 800 L0 800 Z"/>
+          <path class="hero__mountain hero__mountain--near" d="M0 620 L220 470 L420 590 L640 430 L860 580 L1080 470 L1300 560 L1440 500 L1440 800 L0 800 Z"/>
+          <path class="hero__road" d="M-40 780 C 300 740, 420 640, 640 650 S 980 760, 1180 620 S 1400 520, 1500 540"/>
+          <path class="hero__road-line" d="M-40 780 C 300 740, 420 640, 640 650 S 980 760, 1180 620 S 1400 520, 1500 540"/>
+          <path class="hero__trail" d="M-40 780 C 300 740, 420 640, 640 650 S 980 760, 1180 620 S 1400 520, 1500 540"/>
+        </svg>
+        <div class="speed-lines"></div>
+      </div>
+
+      <div class="container hero__inner">
+        <div class="hero__content">
+          <p class="kicker"><span class="kicker__jp">峠フリート</span> Gestion de flotte pour agences de location</p>
+          <h1 class="hero__title">
+            <span>Maîtrisez</span>
+            <span>votre flotte</span>
+            <span class="text-accent">dans chaque virage.</span>
+          </h1>
+          <p class="hero__lead">
+            Disponibilités, réservations, entretiens et kilométrage : toute votre flotte
+            sur un seul tableau de bord, en temps réel. Fini les tableurs, place au pilotage.
+          </p>
+          <div class="hero__actions">
+            <a href="#contact" class="btn btn--primary">Demander une démo</a>
+            <a href="#features" class="btn btn--ghost">Voir les fonctionnalités</a>
+          </div>
+        </div>
+
+        <!-- Compte-tours : taux d'occupation de la flotte (données de démonstration) -->
+        <div class="gauge" aria-label="Exemple : taux d'occupation de la flotte de 78 %">
+          <svg class="gauge__svg" viewBox="0 0 200 200" aria-hidden="true">
+            <circle class="gauge__track" cx="100" cy="100" r="80"/>
+            <circle class="gauge__value" cx="100" cy="100" r="80" data-gauge="78"/>
+          </svg>
+          <div class="gauge__label">
+            <strong><span data-count="78">0</span>%</strong>
+            <span class="gauge__caption">Taux d'occupation</span>
+          </div>
+          <p class="gauge__note">Données de démonstration</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ BANDEAU DÉFILANT ============ -->
+    <div class="marquee" aria-hidden="true">
+      <div class="marquee__track">
+        <span>Disponibilités en temps réel</span><span>★</span>
+        <span>Réservations</span><span>★</span>
+        <span>Entretiens &amp; contrôles techniques</span><span>★</span>
+        <span>Kilométrage</span><span>★</span>
+        <span>Multi-agences</span><span>★</span>
+        <!-- Contenu dupliqué pour une boucle continue -->
+        <span>Disponibilités en temps réel</span><span>★</span>
+        <span>Réservations</span><span>★</span>
+        <span>Entretiens &amp; contrôles techniques</span><span>★</span>
+        <span>Kilométrage</span><span>★</span>
+        <span>Multi-agences</span><span>★</span>
+      </div>
+    </div>
+
+    <!-- ============ FONCTIONNALITÉS ============ -->
+    <section class="section" id="features">
+      <div class="container">
+        <header class="section__head reveal">
+          <p class="kicker">Fonctionnalités</p>
+          <h2 class="section__title">Six étapes pour <span class="text-accent">dominer la route</span></h2>
+        </header>
+
+        <div class="grid grid--3">
+          <article class="card reveal">
+            <span class="card__stage">Stage 01</span>
+            <h3 class="card__title">Parc en temps réel</h3>
+            <p>Disponible, loué, en entretien : le statut de chaque véhicule d'un coup d'œil, agence par agence.</p>
+          </article>
+          <article class="card reveal">
+            <span class="card__stage">Stage 02</span>
+            <h3 class="card__title">Réservations</h3>
+            <p>Planning visuel des locations, détection des conflits et affectation du bon véhicule en quelques clics.</p>
+          </article>
+          <article class="card reveal">
+            <span class="card__stage">Stage 03</span>
+            <h3 class="card__title">Entretiens &amp; CT</h3>
+            <p>Vidanges, pneus, contrôles techniques : des alertes avant l'échéance, jamais après.</p>
+          </article>
+          <article class="card reveal">
+            <span class="card__stage">Stage 04</span>
+            <h3 class="card__title">Kilométrage &amp; carburant</h3>
+            <p>Relevés au départ et au retour, calcul automatique des dépassements et des frais de carburant.</p>
+          </article>
+          <article class="card reveal">
+            <span class="card__stage">Stage 05</span>
+            <h3 class="card__title">Multi-agences</h3>
+            <p>Transférez un véhicule d'une agence à l'autre et gardez une vision globale de tout le réseau.</p>
+          </article>
+          <article class="card reveal">
+            <span class="card__stage">Stage 06</span>
+            <h3 class="card__title">Statistiques</h3>
+            <p>Taux d'occupation, rentabilité par modèle, coûts d'entretien : les chiffres qui font gagner des places.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ APERÇU DU TABLEAU DE BORD ============ -->
+    <section class="section section--dark" id="dashboard">
+      <div class="container">
+        <header class="section__head reveal">
+          <p class="kicker">Le tableau de bord</p>
+          <h2 class="section__title">Votre flotte, <span class="text-accent">vue du cockpit</span></h2>
+        </header>
+
+        <!-- Maquette statique : sera alimentée par PHP / base de données plus tard -->
+        <div class="dashboard reveal">
+          <div class="dashboard__bar">
+            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            <span class="dashboard__url">app.tougefleet.fr/flotte</span>
+          </div>
+
+          <div class="dashboard__stats">
+            <div class="stat"><strong data-count="128">0</strong><span>Véhicules</span></div>
+            <div class="stat stat--ok"><strong data-count="94">0</strong><span>En location</span></div>
+            <div class="stat stat--warn"><strong data-count="6">0</strong><span>En entretien</span></div>
+            <div class="stat"><strong data-count="28">0</strong><span>Disponibles</span></div>
+          </div>
+
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Immat.</th>
+                  <th>Modèle</th>
+                  <th>Agence</th>
+                  <th>Kilométrage</th>
+                  <th>Statut</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="mono">AE-086-TF</td>
+                  <td>Toyota Corolla</td>
+                  <td>Lyon Part-Dieu</td>
+                  <td class="mono">42 180 km</td>
+                  <td><span class="badge badge--ok">En location</span></td>
+                </tr>
+                <tr>
+                  <td class="mono">FD-317-RX</td>
+                  <td>Mazda MX-5</td>
+                  <td>Annecy Gare</td>
+                  <td class="mono">18 920 km</td>
+                  <td><span class="badge badge--free">Disponible</span></td>
+                </tr>
+                <tr>
+                  <td class="mono">GT-200-SC</td>
+                  <td>Renault Clio</td>
+                  <td>Grenoble Centre</td>
+                  <td class="mono">67 450 km</td>
+                  <td><span class="badge badge--warn">Entretien</span></td>
+                </tr>
+                <tr>
+                  <td class="mono">EV-034-NS</td>
+                  <td>Peugeot 208</td>
+                  <td>Lyon Part-Dieu</td>
+                  <td class="mono">9 310 km</td>
+                  <td><span class="badge badge--ok">En location</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ DÉMARRAGE (compte à rebours) ============ -->
+    <section class="section" id="steps">
+      <div class="container">
+        <header class="section__head reveal">
+          <p class="kicker">Démarrage</p>
+          <h2 class="section__title">Prêt en <span class="text-accent">trois temps</span></h2>
+        </header>
+
+        <ol class="steps">
+          <li class="step reveal">
+            <span class="step__num">3</span>
+            <h3>Importez votre parc</h3>
+            <p>Ajoutez vos véhicules à la main ou importez votre fichier existant.</p>
+          </li>
+          <li class="step reveal">
+            <span class="step__num">2</span>
+            <h3>Configurez vos agences</h3>
+            <p>Créez vos agences, vos équipes et leurs droits d'accès.</p>
+          </li>
+          <li class="step reveal">
+            <span class="step__num">1</span>
+            <h3>Prenez les réservations</h3>
+            <p>Le planning se remplit, les alertes d'entretien tombent toutes seules.</p>
+          </li>
+          <li class="step step--go reveal">
+            <span class="step__num">GO!</span>
+            <h3>Pilotez</h3>
+            <p>Vous gardez le contrôle, virage après virage.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ============ TARIFS ============ -->
+    <section class="section section--dark" id="pricing">
+      <div class="container">
+        <header class="section__head reveal">
+          <p class="kicker">Tarifs</p>
+          <h2 class="section__title">Choisissez <span class="text-accent">votre catégorie</span></h2>
+        </header>
+
+        <div class="grid grid--3">
+          <article class="plan reveal">
+            <h3 class="plan__name">Rookie</h3>
+            <p class="plan__price"><strong>49 €</strong> / mois</p>
+            <ul class="plan__list">
+              <li>1 agence</li>
+              <li>Jusqu'à 25 véhicules</li>
+              <li>Réservations &amp; planning</li>
+              <li>Alertes d'entretien</li>
+            </ul>
+            <a href="#contact" class="btn btn--ghost">Choisir Rookie</a>
+          </article>
+
+          <article class="plan plan--featured reveal">
+            <span class="plan__tag">Le plus choisi</span>
+            <h3 class="plan__name">Downhill</h3>
+            <p class="plan__price"><strong>129 €</strong> / mois</p>
+            <ul class="plan__list">
+              <li>Jusqu'à 5 agences</li>
+              <li>Jusqu'à 150 véhicules</li>
+              <li>Transferts entre agences</li>
+              <li>Statistiques avancées</li>
+            </ul>
+            <a href="#contact" class="btn btn--primary">Choisir Downhill</a>
+          </article>
+
+          <article class="plan reveal">
+            <h3 class="plan__name">Legend</h3>
+            <p class="plan__price"><strong>Sur devis</strong></p>
+            <ul class="plan__list">
+              <li>Agences illimitées</li>
+              <li>Véhicules illimités</li>
+              <li>Accès API</li>
+              <li>Accompagnement dédié</li>
+            </ul>
+            <a href="#contact" class="btn btn--ghost">Nous contacter</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CONTACT ============ -->
+    <section class="section" id="contact">
+      <div class="container contact">
+        <div class="contact__intro reveal">
+          <p class="kicker">Contact</p>
+          <h2 class="section__title">On prend <span class="text-accent">le départ ?</span></h2>
+          <p>Laissez-nous vos coordonnées : nous vous présentons Touge Fleet avec les données de votre agence.</p>
+        </div>
+
+        <!-- Formulaire vitrine : l'envoi sera géré en PHP (contact.php) dans un second temps -->
+        <form class="form reveal" id="contact-form" action="#" method="post" novalidate>
+          <div class="form__row">
+            <label for="name">Nom</label>
+            <input type="text" id="name" name="name" autocomplete="name" required>
+          </div>
+          <div class="form__row">
+            <label for="agency">Agence</label>
+            <input type="text" id="agency" name="agency" autocomplete="organization" required>
+          </div>
+          <div class="form__row">
+            <label for="email">E-mail</label>
+            <input type="email" id="email" name="email" autocomplete="email" required>
+          </div>
+          <div class="form__row">
+            <label for="fleet">Taille de la flotte</label>
+            <select id="fleet" name="fleet">
+              <option>Moins de 25 véhicules</option>
+              <option>25 à 150 véhicules</option>
+              <option>Plus de 150 véhicules</option>
+            </select>
+          </div>
+          <div class="form__row">
+            <label for="message">Message</label>
+            <textarea id="message" name="message" rows="4"></textarea>
+          </div>
+          <button type="submit" class="btn btn--primary">Envoyer la demande</button>
+          <p class="form__feedback" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============ PIED DE PAGE ============ -->
+  <footer class="footer">
+    <div class="container footer__inner">
+      <a href="#top" class="logo">
+        <span class="logo__kanji" aria-hidden="true">峠</span>
+        <span class="logo__text">Touge<em>Fleet</em></span>
+      </a>
+      <p>&copy; <span data-year></span> Touge Fleet. Projet vitrine, données fictives.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

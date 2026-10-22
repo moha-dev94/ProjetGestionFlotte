@@ -1,0 +1,132 @@
+/* =========================================================
+   BASE : variables, reset, typographie, utilitaires
+   ========================================================= */
+
+:root {
+  /* Couleurs : nuit sur le col, phares et feux arrière */
+  --c-night:      #08080c;
+  --c-asphalt:    #121219;
+  --c-asphalt-2:  #1b1b25;
+  --c-line:       #2a2a38;
+  --c-white:      #f4f4f0;
+  --c-muted:      #9a9aab;
+  --c-red:        #e3061b;   /* feux arrière / accent principal */
+  --c-red-dark:   #a3000f;
+  --c-yellow:     #ffd60a;   /* phares / lignes de route */
+  --c-green:      #2ee59d;
+
+  /* Typographie */
+  --f-display: "Bebas Neue", "Arial Narrow", sans-serif;
+  --f-body:    "Rajdhani", "Segoe UI", sans-serif;
+  --f-jp:      "Noto Sans JP", sans-serif;
+
+  /* Espacements et formes */
+  --space-xs: .5rem;
+  --space-sm: 1rem;
+  --space-md: 2rem;
+  --space-lg: 4rem;
+  --space-xl: 7rem;
+  --radius:   4px;
+  --skew:     -8deg;          /* inclinaison "vitesse" utilisée partout */
+  --container: 1200px;
+  --header-h: 72px;
+
+  --transition: .25s ease;
+}
+
+/* ---------- Reset léger ---------- */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+* { margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; scroll-padding-top: var(--header-h); }
+
+body {
+  min-height: 100vh;
+  background: var(--c-night);
+  color: var(--c-white);
+  font-family: var(--f-body);
+  font-size: 1.125rem;
+  font-weight: 500;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* Lignes de balayage façon vieil écran CRT, très discrètes */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 100;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, .025) 0 1px,
+    transparent 1px 3px
+  );
+}
+
+img, svg { display: block; max-width: 100%; }
+
+a { color: inherit; text-decoration: none; }
+
+ul, ol { list-style: none; }
+
+button, input, select, textarea { font: inherit; color: inherit; }
+
+/* ---------- Typographie ---------- */
+h1, h2, h3 {
+  font-family: var(--f-display);
+  font-weight: 400;
+  line-height: .95;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+}
+
+p { max-width: 65ch; }
+
+.text-accent { color: var(--c-red); }
+
+.mono { font-variant-numeric: tabular-nums; letter-spacing: .03em; }
+
+/* ---------- Utilitaires ---------- */
+.container {
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: var(--space-sm);
+}
+
+@media (min-width: 768px) {
+  .container { padding-inline: var(--space-md); }
+}
+
+.grid { display: grid; gap: var(--space-md); }
+
+@media (min-width: 768px) {
+  .grid--3 { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 1024px) {
+  .grid--3 { grid-template-columns: repeat(3, 1fr); }
+}
+
+:focus-visible {
+  outline: 2px solid var(--c-yellow);
+  outline-offset: 3px;
+}
+
+/* Respecte les utilisateurs qui désactivent les animations */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *,
+  *::before,
+  *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
