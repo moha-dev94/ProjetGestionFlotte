@@ -72,7 +72,8 @@ function docSpecimen(c, type) {
 }
 const docSrc = (c, type) => { const d = c.docs[type]; return d.file || (d.specimen ? docSpecimen(c, type) : null); };
 
-function compressImage(file, max = 1000, quality = 0.72) {
+/* Réduit l'image avant l'envoi au serveur. Le logo reste en PNG pour garder la transparence. */
+function compressImage(file, max = 1000, type = "image/jpeg", quality = 0.72) {
   return new Promise((resolve, reject) => {
     const url = URL.createObjectURL(file);
     const img = new Image();
@@ -83,7 +84,7 @@ function compressImage(file, max = 1000, quality = 0.72) {
       canvas.height = Math.round(img.height * scale);
       canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
       URL.revokeObjectURL(url);
-      resolve(canvas.toDataURL("image/jpeg", quality));
+      resolve(canvas.toDataURL(type, quality));
     };
     img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("image illisible")); };
     img.src = url;
@@ -97,13 +98,6 @@ async function readImages(fileList) {
   }
   return out;
 }
-/* Sauvegarde après ajout de photos ; annule l'ajout si le stockage est plein. */
-function saveOrUndo(undo) {
-  if (save()) return true;
-  undo();
-  toast("Le stockage de ce navigateur est plein. Supprimez des photos ou réinitialisez la démo.");
-  return false;
-}
 
 /* =========================================================
    Icônes
@@ -116,6 +110,7 @@ const ICONS = {
   mouvements: '<path d="M7 7h12l-3-3M17 17H5l3 3"/>',
   entretien: '<path d="M14.7 6.3a4 4 0 0 0-5.4 5.2L4 16.8V20h3.2l5.3-5.3a4 4 0 0 0 5.2-5.4l-2.5 2.5-2.5-.5-.5-2.5Z"/>',
   clients: '<circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M16 4.6a3 3 0 0 1 0 6M21 20a5 5 0 0 0-4-4.9"/>',
+  personnalisation: '<path d="M12 21a9 9 0 1 1 9-9c0 2-1.6 3-3.5 3H15a2 2 0 0 0-1.4 3.4A1.5 1.5 0 0 1 12 21Z"/><circle cx="7.5" cy="11" r="1.2"/><circle cx="11" cy="7" r="1.2"/><circle cx="16" cy="8.5" r="1.2"/>',
   "ma-location": '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/>',
   reserver: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M12 13v5M9.5 15.5h5"/>',
   "mes-reservations": '<path d="M5 4h14v16l-3-2-2 2-2-2-2 2-2-2-3 2Z"/><path d="M9 9h6M9 13h6"/>',

@@ -17,6 +17,7 @@
   <link rel="stylesheet" href="assets/css/sections.css">
 
   <script src="assets/js/main.js" defer></script>
+  <script src="assets/js/brand.js" defer></script>
 </head>
 <body>
 
@@ -24,8 +25,8 @@
   <header class="header" id="top">
     <div class="container header__inner">
       <a href="#top" class="logo" aria-label="Touge Fleet, retour en haut">
-        <span class="logo__kanji" aria-hidden="true">峠</span>
-        <span class="logo__text">Touge<em>Fleet</em></span>
+        <span class="logo__kanji" aria-hidden="true" data-brand-mark>峠</span>
+        <span class="logo__text" data-brand-name>Touge<em>Fleet</em></span>
       </a>
 
       <button class="nav-toggle" aria-expanded="false" aria-controls="nav" aria-label="Ouvrir le menu">
@@ -62,7 +63,7 @@
 
       <div class="container hero__inner">
         <div class="hero__content">
-          <p class="kicker"><span class="kicker__jp">峠フリート</span> Gestion de flotte pour agences de location</p>
+          <p class="kicker"><span class="kicker__jp" data-brand-jp>峠フリート</span> Gestion de flotte pour agences de location</p>
           <h1 class="hero__title">
             <span>Maîtrisez</span>
             <span>votre flotte</span>
@@ -165,7 +166,7 @@
         <div class="dashboard reveal">
           <div class="dashboard__bar">
             <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-            <span class="dashboard__url">app.tougefleet.fr/flotte</span>
+            <span class="dashboard__url" data-brand-url>app.tougefleet.fr/flotte</span>
           </div>
 
           <div class="dashboard__stats">
@@ -310,7 +311,7 @@
         <div class="contact__intro reveal">
           <p class="kicker">Contact</p>
           <h2 class="section__title">On prend <span class="text-accent">le départ ?</span></h2>
-          <p>Laissez-nous vos coordonnées : nous vous présentons Touge Fleet avec les données de votre agence.</p>
+          <p>Laissez-nous vos coordonnées : nous vous présentons <span data-brand-plain>Touge Fleet</span> avec les données de votre agence.</p>
         </div>
 
         <!-- Formulaire vitrine : l'envoi sera géré en PHP (contact.php) dans un second temps -->
@@ -351,10 +352,10 @@
   <footer class="footer">
     <div class="container footer__inner">
       <a href="#top" class="logo">
-        <span class="logo__kanji" aria-hidden="true">峠</span>
-        <span class="logo__text">Touge<em>Fleet</em></span>
+        <span class="logo__kanji" aria-hidden="true" data-brand-mark>峠</span>
+        <span class="logo__text" data-brand-name>Touge<em>Fleet</em></span>
       </a>
-      <p>&copy; <span data-year></span> Touge Fleet. Projet vitrine, données fictives.</p>
+      <p>&copy; <span data-year></span> <span data-brand-plain>Touge Fleet</span>. Projet vitrine, données fictives.</p>
     </div>
   </footer>
 

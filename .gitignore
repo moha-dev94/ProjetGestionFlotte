@@ -3,6 +3,12 @@
 .vscode/
 .idea/
 
+# Base de données et fichiers envoyés (recréés automatiquement)
+storage/
+
+# Réglages locaux de l'API (mot de passe MySQL, etc.)
+api/config.local.php
+
 # Système
 .DS_Store
 Thumbs.db

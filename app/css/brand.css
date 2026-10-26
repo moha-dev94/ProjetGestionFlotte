@@ -1,0 +1,29 @@
+/* ---------- Marque : logo, sigle et écran Personnalisation ---------- */
+.brand__logo { display: block; height: 36px; max-width: 132px; object-fit: contain; }
+.brand__kanji--text { font-family: var(--f-display); font-size: 16px; letter-spacing: .02em; }
+
+.brand-editor { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; align-items: start; }
+.brand-preview { grid-column: 1 / -1; }
+.brand-preview__card {
+  display: flex; flex-direction: column; gap: 18px; padding: 24px;
+  border-radius: var(--r); border: 1px solid var(--line);
+  background: radial-gradient(ellipse at 85% 10%, color-mix(in srgb, var(--accent) 18%, var(--bg)) 0%, var(--bg) 65%);
+}
+.brand-preview__title { font-size: clamp(36px, 5vw, 56px); }
+
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field__label { font-size: 13px; font-weight: 600; color: var(--muted); }
+
+.presets { display: flex; flex-wrap: wrap; gap: 8px; }
+.preset {
+  display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px;
+  border: 1px solid var(--line); border-radius: 99px; background: var(--panel-2); font-weight: 600; font-size: 13px;
+}
+.preset:hover { border-color: var(--muted); }
+.preset__sw { width: 12px; height: 12px; border-radius: 50%; box-shadow: 0 0 0 1px rgba(0, 0, 0, .25); }
+.preset__sw + .preset__sw { margin-left: -9px; margin-right: 4px; }
+.input--color { height: 42px; padding: 4px; cursor: pointer; }
+
+@media (max-width: 900px) {
+  .brand-editor { grid-template-columns: minmax(0, 1fr); }
+}

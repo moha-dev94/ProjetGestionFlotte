@@ -51,8 +51,8 @@ function openVehicle(id) {
           <button data-action="lightbox" aria-label="Agrandir la photo"><img src="${p}" alt=""></button>
           ${i === 0 ? `<span class="thumb__badge">Principale</span>` : ""}
           <div class="thumb__tools">
-            ${i > 0 ? `<button data-action="photo-main" data-vid="${v.id}" data-idx="${i}" title="Utiliser comme photo principale" aria-label="Photo principale">★</button>` : ""}
-            <button data-action="photo-del" data-vid="${v.id}" data-idx="${i}" title="Supprimer" aria-label="Supprimer la photo">✕</button>
+            ${i > 0 ? `<button data-action="photo-main" data-vid="${v.id}" data-pid="${v.photoIds[i]}" title="Utiliser comme photo principale" aria-label="Photo principale">★</button>` : ""}
+            <button data-action="photo-del" data-vid="${v.id}" data-pid="${v.photoIds[i]}" title="Supprimer" aria-label="Supprimer la photo">✕</button>
           </div>
         </div>`).join("")}
         <label class="thumb thumb--add">+ Ajouter des photos<input class="sr-only" type="file" accept="image/*" multiple data-vehicle-photos="${v.id}"></label>
@@ -235,14 +235,9 @@ function submitReservation() {
   if (isNaN(end) || end <= start) { err.textContent = "La date de retour doit être après la date de départ."; return; }
   if (!picked) { err.textContent = "Choisissez un véhicule dans la liste."; return; }
   const v = byId(picked.value);
-  if (hasConflict(v.id, start, end)) { err.textContent = "Ce véhicule vient d'être réservé sur ces dates. Choisissez-en un autre."; refreshPicker(); return; }
-  let c = state.customers.find((x) => x.name.toLowerCase() === name.toLowerCase());
-  const isNew = !c;
-  if (!c) { c = { id: "c" + Date.now().toString(36), name, email: slug(name) + "@exemple.fr", since: 0, docs: makeDocs("manquant", null) }; state.customers.push(c); }
-  const r = { id: "R-" + state.nextId++, vehicleId: v.id, customerId: c.id, client: c.name, start, end, status: "confirmee", tStart: "10:00", tEnd: "18:00", price: v.price * (end - start), kmStart: null, fuelStart: null, photosOut: [], photosIn: [], reason: "", requestedDay: 0 };
-  state.reservations.push(r);
-  save(); closePanel(); render();
-  toast(`Réservation ${r.id} confirmée : ${v.model} pour ${c.name}.${isNew || !docsValid(c) ? " Documents à vérifier avant la remise des clés." : ""}`);
+  act("reservations", { vehicleId: v.id, start: isoOf(start), end: isoOf(end), customerName: name }, {
+    message: (res) => `Réservation ${res.code} confirmée : ${v.model} pour ${name}.${res.docsValid ? "" : " Documents à vérifier avant la remise des clés."}`,
+  });
 }
 
 /* ----- Remise des clés ----- */
@@ -289,11 +284,9 @@ function confirmCheckout(id) {
     return;
   }
   const r = resById(id), v = byId(r.vehicleId);
-  const before = { ...r };
-  Object.assign(r, { status: "en_cours", kmStart: v.km, fuelStart: v.fuel, photosOut: ui.pendingPhotos.slice() });
-  if (!saveOrUndo(() => Object.assign(r, before))) return;
-  closePanel(); render();
-  toast(`${v.model} remise à ${r.client}. Retour attendu ${fmtRel(r.end)}.`);
+  act(`reservations/${id}/checkout`, { photos: ui.pendingPhotos.slice() }, {
+    message: `${v.model} remise à ${r.client}. Retour attendu ${fmtRel(r.end)}.`,
+  });
 }
 
 /* ----- Retour du véhicule ----- */
@@ -339,13 +332,9 @@ function confirmCheckin(id) {
   const err = document.getElementById("ci-error");
   if (!km || km < r.kmStart) { err.textContent = `Le compteur doit être d'au moins ${fmtKm(r.kmStart)} (relevé au départ).`; return; }
   if (!document.getElementById("ci-check").checked) { err.textContent = "Confirmez l'état des lieux de retour."; return; }
-  const c = computeReturn(r, km, fuel);
-  const before = { ...r }, vBefore = { km: v.km, fuel: v.fuel };
-  Object.assign(r, { status: "terminee", kmEnd: km, extras: c.total - r.price, photosIn: ui.pendingPhotos.slice(), end: Math.max(r.end, 0) });
-  v.km = km; v.fuel = fuel;
-  if (!saveOrUndo(() => { Object.assign(r, before); Object.assign(v, vBefore); })) return;
-  closePanel(); render();
-  toast(`Retour clôturé : ${money2.format(c.total)} facturés.${maintenanceInfo(v).service !== "ok" ? " Révision à prévoir pour ce véhicule." : ""}`);
+  act(`reservations/${id}/checkin`, { km, fuel, photos: ui.pendingPhotos.slice() }, {
+    message: (res) => `Retour clôturé : ${money2.format(res.bill.total)} facturés.${maintenanceInfo(byId(v.id)).service !== "ok" ? " Révision à prévoir pour ce véhicule." : ""}`,
+  });
 }
 
 /* ----- Demande côté client ----- */
@@ -374,15 +363,12 @@ function openClientRequest(vid) {
       ${ready ? `<button class="btn btn--primary" data-action="client-send" data-vid="${v.id}">Envoyer la demande</button>` : `<button class="btn btn--primary" data-action="nav" data-view="mes-documents">Compléter mes documents</button>`}
     </div>`);
 }
-function sendClientRequest(vid) {
-  const v = byId(vid), c = me(), s = ui.search;
-  if (hasConflict(v.id, s.start, s.end)) { closePanel(); render(); toast("Ce véhicule vient d'être réservé sur ces dates. Choisissez-en un autre."); return; }
-  const r = { id: "R-" + state.nextId++, vehicleId: v.id, customerId: c.id, client: c.name, start: s.start, end: s.end, status: "demande", tStart: "10:00", tEnd: "18:00", price: v.price * (s.end - s.start), kmStart: null, fuelStart: null, photosOut: [], photosIn: [], reason: "", requestedDay: 0 };
-  state.reservations.push(r);
-  save();
-  closePanel();
-  go("ma-location");
-  toast(`Demande ${r.id} envoyée. L'agence vérifie vos documents et vous répond sous 24 h.`);
+async function sendClientRequest(vid) {
+  const s = ui.search;
+  const res = await act("reservations", { vehicleId: vid, start: isoOf(s.start), end: isoOf(s.end) }, {
+    message: (r) => `Demande ${r.code} envoyée. L'agence vérifie vos documents et vous répond sous 24 h.`,
+  });
+  if (res) go("ma-location");
 }
 
 /* ----- Confirmation générique ----- */

@@ -9,6 +9,7 @@ const ADMIN_VIEWS = {
   mouvements: { title: "Départs & retours", render: renderMoves, count: () => visibleRes().filter((r) => (r.status === "confirmee" && r.start === 0) || (r.status === "en_cours" && r.end <= 0)).length },
   entretien: { title: "Entretien", render: renderMaintenance, count: () => alerts().length },
   clients: { title: "Clients", render: renderCustomers },
+  personnalisation: { title: "Personnalisation", render: renderBrandEditor },
 };
 const CLIENT_VIEWS = {
   "ma-location": { title: "Ma location", render: renderMyRental },
@@ -32,7 +33,6 @@ function render() {
 
 function renderShell(views) {
   const admin = session.role === "admin";
-  const user = admin ? ADMIN : me();
   const nav = Object.entries(views).map(([key, v]) => {
     const count = v.count ? v.count() : 0;
     return `<button class="nav__item" data-action="nav" data-view="${key}" ${key === ui.view ? 'aria-current="page"' : ""}>${icon(key)}${v.title}<span class="nav__count">${count || ""}</span></button>`;
@@ -41,7 +41,7 @@ function renderShell(views) {
     ? `<span class="demo-tag">Données d'exemple</span>
        <select class="select" id="agency-switch" aria-label="Agence">
          <option value="all">Toutes les agences</option>
-         ${Object.entries(AGENCIES).map(([k, a]) => `<option value="${k}" ${ui.agency === k ? "selected" : ""}>${a.name}</option>`).join("")}
+         ${Object.entries(AGENCIES).map(([k, a]) => `<option value="${k}" ${ui.agency === k ? "selected" : ""}>${esc(a.name)}</option>`).join("")}
        </select>
        <button class="btn btn--primary" data-action="new-res">+ Nouvelle réservation</button>`
     : `<button class="btn btn--primary" data-action="nav" data-view="reserver">Réserver un véhicule</button>`;
@@ -49,14 +49,14 @@ function renderShell(views) {
   <div class="app">
     <aside class="side">
       <div class="brand">
-        <span class="brand__kanji" aria-hidden="true">峠</span>
-        <span class="brand__name">Touge<em>Fleet</em><span class="brand__sub">${admin ? "Espace agence" : "Espace client"}</span></span>
+        ${brandMarkHtml()}
+        <span class="brand__name">${brandNameHtml()}<span class="brand__sub">${admin ? "Espace agence" : "Espace client"}</span></span>
       </div>
       <nav class="nav" aria-label="Navigation principale">${nav}</nav>
       <div class="side__foot">
-        <p class="side__note">Prototype : véhicules, clients, documents et montants sont des exemples. Vos changements restent dans ce navigateur.</p>
+        <p class="side__note">Démo : véhicules, clients, documents et montants sont des exemples enregistrés dans la base du projet.</p>
         <button class="link-btn" data-action="logout">Changer de compte</button>
-        <button class="link-btn" data-action="ask-reset">Réinitialiser la démo</button>
+        ${admin ? `<button class="link-btn" data-action="ask-reset">Réinitialiser la démo</button>` : ""}
       </div>
     </aside>
     <div class="main">
@@ -66,8 +66,8 @@ function renderShell(views) {
         <div class="top__actions">
           ${actions}
           <div class="user">
-            <span class="avatar${admin ? " avatar--admin" : ""}">${initials(user.name)}</span>
-            <div><div class="user__name">${esc(user.name)}</div><div class="user__role">${admin ? ADMIN.role : "Client"}</div></div>
+            <span class="avatar${admin ? " avatar--admin" : ""}">${initials(session.name)}</span>
+            <div><div class="user__name">${esc(session.name)}</div><div class="user__role">${admin ? ADMIN_ROLE_LABEL : "Client"}</div></div>
             <button class="btn btn--sm btn--ghost" data-action="logout">Se déconnecter</button>
           </div>
         </div>
@@ -79,15 +79,13 @@ function renderShell(views) {
 
 /* ---------- Connexion ---------- */
 function renderLogin() {
-  const paul = state.customers.find((c) => c.email === "paul.henry@exemple.fr");
-  const ines = state.customers.find((c) => c.email === "ines.haddad@exemple.fr");
   const login = ui.authMode === "login";
   return `
   <div class="login">
     <section class="login__art">
       <div class="brand" style="padding:0">
-        <span class="brand__kanji" aria-hidden="true">峠</span>
-        <span class="brand__name">Touge<em>Fleet</em><span class="brand__sub">Location de véhicules</span></span>
+        ${brandMarkHtml()}
+        <span class="brand__name">${brandNameHtml()}<span class="brand__sub">${esc(brand.tagline)}</span></span>
       </div>
       <div>
         <h1 class="login__title">Une flotte,<br><em>une seule clé.</em></h1>
@@ -101,6 +99,7 @@ function renderLogin() {
     </section>
     <section class="login__panel">
       <div class="login__box">
+        ${serverError ? `<div class="callout" style="--c:var(--late)"><strong>Base de données injoignable.</strong> ${esc(serverError)}</div>` : ""}
         <div class="tabs" role="tablist">
           <button class="tab" role="tab" aria-selected="${login}" data-action="auth-mode" data-mode="login">Connexion</button>
           <button class="tab" role="tab" aria-selected="${!login}" data-action="auth-mode" data-mode="signup">Créer un compte</button>
@@ -115,28 +114,34 @@ function renderLogin() {
         <form class="stack" id="signup-form" novalidate>
           <label>Prénom et nom<input class="input" id="su-name" autocomplete="name" placeholder="Camille Durand"></label>
           <label>E-mail<input class="input" type="email" id="su-email" autocomplete="email" placeholder="vous@exemple.fr"></label>
-          <label>Mot de passe<input class="input" type="password" id="su-pw" autocomplete="new-password"></label>
+          <label>Mot de passe (8 caractères minimum)<input class="input" type="password" id="su-pw" autocomplete="new-password"></label>
           <p class="form-error" id="su-error" role="alert"></p>
           <button class="btn btn--primary" type="submit">Créer mon compte client</button>
         </form>`}
-        <p class="note">Prototype : les mots de passe ne sont ni vérifiés ni enregistrés.</p>
         <div>
           <div class="sub-title">Comptes de démonstration</div>
           <div class="demo-acc">
-            <button data-action="demo-login" data-role="admin"><span class="avatar avatar--admin">${initials(ADMIN.name)}</span><span><strong>Espace agence</strong><small>${ADMIN.name}, responsable d'agence</small></span><span aria-hidden="true">→</span></button>
-            ${paul ? `<button data-action="demo-login" data-role="client" data-cid="${paul.id}"><span class="avatar">PH</span><span><strong>Espace client</strong><small>Paul Henry, location en cours</small></span><span aria-hidden="true">→</span></button>` : ""}
-            ${ines ? `<button data-action="demo-login" data-role="client" data-cid="${ines.id}"><span class="avatar">IH</span><span><strong>Espace client</strong><small>Inès Haddad, demande à valider</small></span><span aria-hidden="true">→</span></button>` : ""}
+            ${DEMO_ACCOUNTS.map((a) => `<button data-action="demo-login" data-email="${a.email}"><span class="avatar${a.admin ? " avatar--admin" : ""}">${a.initials}</span><span><strong>${a.title}</strong><small>${esc(a.hint)}</small></span><span aria-hidden="true">→</span></button>`).join("")}
           </div>
+          <p class="note" style="margin-top:8px">Mot de passe des comptes de démonstration : ${DEMO_PASSWORD}</p>
         </div>
       </div>
     </section>
   </div>`;
 }
 
-function login(role, customerId) {
-  session = { role, customerId: customerId || null };
-  saveSession();
-  ui.view = "";
+async function signIn(email, password, errorEl) {
+  try {
+    const { user } = await api("login", { email, password });
+    await afterLogin(user);
+  } catch (e) {
+    if (errorEl) errorEl.textContent = e.message; else toast(e.message);
+  }
+}
+async function afterLogin(user, view = "") {
+  setSession(user);
+  await reload();
+  ui.view = view;
   closePanel();
   render();
   setHash(ui.view);
@@ -146,25 +151,28 @@ function doLogin() {
   const pw = document.getElementById("login-pw").value;
   const err = document.getElementById("login-error");
   if (!email || !pw) { err.textContent = "Saisissez votre e-mail et votre mot de passe."; return; }
-  if (email === ADMIN.email) return login("admin");
-  const c = state.customers.find((x) => x.email === email);
-  if (!c) { err.textContent = "Aucun compte avec cet e-mail. Utilisez un compte de démonstration ou créez un compte."; return; }
-  login("client", c.id);
+  signIn(email, pw, err);
 }
-function doSignup() {
+async function doSignup() {
   const name = document.getElementById("su-name").value.trim().replace(/\s+/g, " ");
   const email = document.getElementById("su-email").value.trim().toLowerCase();
-  const pw = document.getElementById("su-pw").value;
+  const password = document.getElementById("su-pw").value;
   const err = document.getElementById("su-error");
-  if (name.split(" ").length < 2) { err.textContent = "Indiquez votre prénom et votre nom."; return; }
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { err.textContent = "Cette adresse e-mail n'est pas valide."; return; }
-  if (pw.length < 8) { err.textContent = "Choisissez un mot de passe d'au moins 8 caractères."; return; }
-  if (email === ADMIN.email || state.customers.some((c) => c.email === email)) { err.textContent = "Un compte existe déjà avec cet e-mail. Connectez-vous."; return; }
-  const c = { id: "c" + Date.now().toString(36), name, email, since: 0, docs: makeDocs("manquant", null) };
-  state.customers.push(c);
-  save();
-  login("client", c.id);
-  ui.view = "mes-documents";
+  try {
+    const { user } = await api("signup", { name, email, password });
+    await afterLogin(user, "mes-documents");
+    toast(`Bienvenue ${name.split(" ")[0]} ! Envoyez vos documents pour pouvoir réserver.`);
+  } catch (e) {
+    err.textContent = e.message;
+  }
+}
+async function logout() {
+  try { await api("logout", {}); } catch (e) { /* déjà déconnecté */ }
+  session = null;
+  state = { vehicles: [], customers: [], reservations: [] };
+  if (ui.brandDraft) { ui.brandDraft = null; applyBrand(brand); }
+  ui.authMode = "login";
+  closePanel();
+  setHash("");
   render();
-  toast(`Bienvenue ${name.split(" ")[0]} ! Envoyez vos documents pour pouvoir réserver.`);
 }

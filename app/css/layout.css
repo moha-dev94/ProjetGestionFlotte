@@ -4,7 +4,7 @@
   position: relative; overflow: hidden;
   display: flex; flex-direction: column; justify-content: space-between; gap: 32px;
   padding: 36px 40px;
-  background: radial-gradient(ellipse at 78% 12%, #2c0f2e 0%, var(--bg) 62%);
+  background: radial-gradient(ellipse at 78% 12%, color-mix(in srgb, var(--accent) 18%, var(--bg)) 0%, var(--bg) 62%);
   border-right: 1px solid var(--line);
 }
 .login__art::before {
@@ -19,7 +19,7 @@
   font-style: italic; transform: skewX(var(--skew)); text-shadow: 4px 4px 0 var(--accent-dark);
 }
 .login__title em { color: var(--accent); font-style: inherit; text-shadow: 4px 4px 0 #000; }
-.login__lead { color: #c9c9d6; max-width: 46ch; margin-top: 18px; font-size: 17px; }
+.login__lead { color: var(--muted); max-width: 46ch; margin-top: 18px; font-size: 17px; }
 .login__road { width: 100%; height: auto; display: block; }
 .login__road .r1 { fill: none; stroke: #050507; stroke-width: 34; }
 .login__road .r2 { fill: none; stroke: var(--headlight); stroke-width: 2.5; stroke-dasharray: 16 18; opacity: .7; }

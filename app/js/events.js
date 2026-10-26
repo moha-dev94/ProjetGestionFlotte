@@ -25,9 +25,13 @@ setInterval(tick, 1000);
 
 /* =========================================================
    Événements (délégation : un seul écouteur par type)
+   Chaque action qui modifie des données appelle l'API via act(),
+   puis recharge les données depuis la base.
    ========================================================= */
 function setHash(view) { try { history.replaceState(null, "", view ? "#" + view : location.pathname); } catch (e) {} }
 function go(view) {
+  // Quitter la personnalisation sans enregistrer annule l'aperçu
+  if (ui.brandDraft && view !== "personnalisation") { ui.brandDraft = null; applyBrand(brand); }
   ui.view = view;
   setHash(view);
   closePanel();
@@ -52,13 +56,13 @@ document.addEventListener("click", (e) => {
   if (!t || t.disabled) return;
   const { action, id } = t.dataset;
   const v = id ? byId(id) : null;
-  const doc = t.dataset.cid ? custById(t.dataset.cid).docs[t.dataset.type] : null;
+  const docRoute = t.dataset.cid ? `customers/${t.dataset.cid}/documents/${t.dataset.type}` : null;
 
   switch (action) {
     // Session
     case "auth-mode": ui.authMode = t.dataset.mode; render(); break;
-    case "demo-login": login(t.dataset.role, t.dataset.cid); break;
-    case "logout": session = null; saveSession(); ui.authMode = "login"; closePanel(); setHash(""); render(); break;
+    case "demo-login": signIn(t.dataset.email, DEMO_PASSWORD); break;
+    case "logout": logout(); break;
 
     // Navigation et panneaux
     case "nav": go(t.dataset.view); break;
@@ -71,23 +75,22 @@ document.addEventListener("click", (e) => {
     case "open-customer": ui.docRefuse = null; openCustomer(id); break;
     case "review": ui.docRefuse = null; ui.refusingRes = false; openReview(id); break;
 
-    // Documents
-    case "doc-ok": Object.assign(doc, { status: "valide", reason: "" }); save(); refresh(); break;
-    case "doc-counter": Object.assign(doc, { status: "valide", reason: "", counter: true, day: 0 }); save(); refresh(); break;
+    // Documents (vérification par l'agence)
+    case "doc-ok": act(docRoute, { action: "valide" }, { keepPanel: true }); break;
+    case "doc-counter": act(docRoute, { action: "counter" }, { keepPanel: true }); break;
     case "doc-ko": ui.docRefuse = `${t.dataset.cid}:${t.dataset.type}`; refresh(); break;
     case "doc-ko-cancel": ui.docRefuse = null; refresh(); break;
     case "doc-ko-confirm":
-      Object.assign(doc, { status: "refuse", reason: document.getElementById("doc-reason").value });
-      ui.docRefuse = null; save(); refresh();
-      toast(`${DOC_TYPES[t.dataset.type].label} refusé. Le client voit le motif dans son espace.`);
+      ui.docRefuse = null;
+      act(docRoute, { action: "refuse", reason: document.getElementById("doc-reason").value }, {
+        keepPanel: true, message: `${DOC_TYPES[t.dataset.type].label} refusé. Le client voit le motif dans son espace.`,
+      });
       break;
 
     // Décision sur une demande ou au comptoir
     case "accept-res": {
       const r = resById(id);
-      r.status = "confirmee";
-      save(); closePanel(); render();
-      toast(`Réservation ${r.id} acceptée. ${r.client} la voit confirmée dans son espace.`);
+      act(`reservations/${id}/accept`, {}, { message: `Réservation ${id} acceptée. ${r.client} la voit confirmée dans son espace.` });
       break;
     }
     case "refuse-res-start": ui.refusingRes = true; ui.docRefuse = null; if (reopen) reopen(); break;
@@ -95,10 +98,8 @@ document.addEventListener("click", (e) => {
     case "refuse-res-confirm": {
       const r = resById(id);
       const comment = document.getElementById("res-comment").value.trim();
-      r.status = "refusee";
-      r.reason = document.getElementById("res-reason").value + (comment ? ` (${comment})` : "");
-      save(); closePanel(); render();
-      toast(`Demande ${r.id} refusée. ${r.client} voit le motif dans son espace.`);
+      const reason = document.getElementById("res-reason").value + (comment ? ` (${comment})` : "");
+      act(`reservations/${id}/refuse`, { reason }, { message: `Demande ${id} refusée. ${r.client} voit le motif dans son espace.` });
       break;
     }
 
@@ -110,63 +111,46 @@ document.addEventListener("click", (e) => {
     case "checkin": openCheckin(id); break;
     case "confirm-checkin": confirmCheckin(id); break;
     case "pending-del": ui.pendingPhotos.splice(Number(t.dataset.idx), 1); document.getElementById("pending-thumbs").innerHTML = pendingThumbs(); break;
-    case "cancel-res": {
-      const r = resById(id); r.status = "annulee";
-      save(); closePanel(); render(); toast(`Réservation ${r.id} annulée. Le véhicule est de nouveau libre sur ces dates.`);
-      break;
-    }
+    case "cancel-res": act(`reservations/${id}/cancel`, {}, { message: `Réservation ${id} annulée. Le véhicule est de nouveau libre sur ces dates.` }); break;
 
     // Flotte
     case "fleet-filter": ui.fleet.status = t.dataset.status; if (ui.view !== "flotte") go("flotte"); else render(); break;
     case "plan-shift": ui.planStart += Number(t.dataset.step); render(); break;
     case "plan-today": ui.planStart = -3; render(); break;
-    case "photo-del": {
-      const veh = byId(t.dataset.vid);
-      veh.photos.splice(Number(t.dataset.idx), 1);
-      save(); refresh();
+    case "photo-del": act(`vehicles/${t.dataset.vid}/photos/${t.dataset.pid}/delete`, {}, { keepPanel: true, message: "Photo supprimée." }); break;
+    case "photo-main": act(`vehicles/${t.dataset.vid}/photos/${t.dataset.pid}/main`, {}, { keepPanel: true, message: "Photo principale mise à jour." }); break;
+    case "send-maint":
+      act(`vehicles/${id}/state`, { action: "entretien" }, {
+        message: (res) => res.clash ? `${v.model} part en entretien. Attention : ${res.clash} réservation(s) à réaffecter dans les 2 jours.` : `${v.model} part en entretien.`,
+      });
       break;
-    }
-    case "photo-main": {
-      const veh = byId(t.dataset.vid);
-      const [p] = veh.photos.splice(Number(t.dataset.idx), 1);
-      veh.photos.unshift(p);
-      save(); refresh();
+    case "maint-done":
+      act(`vehicles/${id}/state`, { action: "maintenance_done" }, { message: () => `${v.model} est de nouveau disponible. Prochaine révision à ${fmtKm(byId(id).nextServiceKm)}.` });
       break;
-    }
-    case "send-maint": {
-      const clash = state.reservations.filter((r) => r.vehicleId === v.id && r.status === "confirmee" && r.start <= 2);
-      v.state = "entretien"; v.note = "Révision programmée";
-      save(); closePanel(); render();
-      toast(clash.length ? `${v.model} part en entretien. Attention : ${clash.length} réservation(s) à réaffecter dans les 2 jours.` : `${v.model} part en entretien.`);
-      break;
-    }
-    case "maint-done": {
-      const m = maintenanceInfo(v);
-      if (m.service !== "ok" || v.state === "entretien") v.nextServiceKm = Math.ceil((v.km + 15000) / 1000) * 1000;
-      if (m.ct !== "ok") v.ctDays = 730;
-      v.state = "ok"; v.note = "";
-      save(); closePanel(); render(); toast(`${v.model} est de nouveau disponible. Prochaine révision à ${fmtKm(v.nextServiceKm)}.`);
-      break;
-    }
-    case "set-hs": v.state = "hs"; v.note = "Déclaré hors service depuis la console"; save(); closePanel(); render(); toast(`${v.model} est hors service.`); break;
-    case "restore": v.state = "ok"; v.note = ""; save(); closePanel(); render(); toast(`${v.model} est remis en service.`); break;
+    case "set-hs": act(`vehicles/${id}/state`, { action: "hs" }, { message: `${v.model} est hors service.` }); break;
+    case "restore": act(`vehicles/${id}/state`, { action: "ok" }, { message: `${v.model} est remis en service.` }); break;
 
     // Espace client
     case "client-pick": openClientRequest(t.dataset.vid); break;
     case "client-send": sendClientRequest(t.dataset.vid); break;
     case "client-cancel": {
       const r = resById(id);
-      openConfirm("Annuler cette réservation ?", `${byId(r.vehicleId).model}, ${fmtShort(r.start)} → ${fmtShort(r.end)}`, "Oui, annuler", () => {
-        r.status = "annulee"; save(); closePanel(); render(); toast(`Réservation ${r.id} annulée.`);
-      });
+      openConfirm("Annuler cette réservation ?", `${byId(r.vehicleId).model}, ${fmtShort(r.start)} → ${fmtShort(r.end)}`, "Oui, annuler", () =>
+        act(`reservations/${id}/cancel`, {}, { message: `Réservation ${id} annulée.` }));
       break;
     }
 
+    // Personnalisation de la marque
+    case "brand-preset": applyBrandPreset(t.dataset.preset); break;
+    case "brand-save": saveBrandDraft(); break;
+    case "brand-cancel": cancelBrandDraft(); break;
+    case "brand-default": resetBrandDraft(); break;
+    case "brand-logo-remove": removeBrandLogo(); break;
+
     // Démo
     case "ask-reset":
-      openConfirm("Réinitialiser la démo ?", "Les réservations, documents et photos ajoutés dans ce navigateur seront remplacés par les données d'exemple.", "Réinitialiser", () => {
-        state = seed(); artCache.clear(); save(); closePanel(); render(); toast("Démo réinitialisée avec les données d'exemple.");
-      });
+      openConfirm("Réinitialiser la démo ?", "Les réservations, documents et photos de la base sont remplacés par les données d'exemple. La marque et le logo sont conservés.", "Réinitialiser", () =>
+        act("reset", {}, { message: "Démo réinitialisée avec les données d'exemple." }));
       break;
     case "confirm-yes": if (ui.onConfirm) ui.onConfirm(); break;
   }
@@ -183,6 +167,7 @@ document.addEventListener("input", (e) => {
   const el = e.target;
   if (el.id === "fleet-q") { ui.fleet.q = el.value; document.getElementById("fleet-grid").innerHTML = fleetCards(); }
   if (el.id === "ci-km" || el.id === "ci-fuel") refreshBill(el.dataset.rid);
+  if (el.dataset.brandField) updateBrandDraft(el.dataset.brandField, el.value);
 });
 
 document.addEventListener("change", async (e) => {
@@ -199,28 +184,22 @@ document.addEventListener("change", async (e) => {
   if (el.id === "cr-end" && el.value) ui.search.end = offOf(el.value);
   if (el.id && el.id.startsWith("cr-")) { render(); return; }
 
-  // Photos et documents
+  // Photos, documents et logo : compressés dans le navigateur puis envoyés à l'API
   if (el.type !== "file" || !el.files.length) return;
+  if (el.id === "brand-logo") { await setBrandLogo(el.files[0]); el.value = ""; return; }
   const images = await readImages(el.files);
   el.value = "";
   if (!images.length) return;
 
   if (el.dataset.vehiclePhotos) {
-    const veh = byId(el.dataset.vehiclePhotos);
-    veh.photos.push(...images);
-    if (!saveOrUndo(() => veh.photos.splice(-images.length))) { refresh(); return; }
-    refresh();
-    toast(`${images.length} photo${images.length > 1 ? "s" : ""} ajoutée${images.length > 1 ? "s" : ""} à ${veh.model}.`);
+    const n = images.length;
+    act(`vehicles/${el.dataset.vehiclePhotos}/photos`, { images }, { keepPanel: true, message: `${n} photo${n > 1 ? "s" : ""} ajoutée${n > 1 ? "s" : ""}.` });
   } else if (el.id === "co-photos" || el.id === "ci-photos") {
     ui.pendingPhotos.push(...images);
     document.getElementById("pending-thumbs").innerHTML = pendingThumbs();
   } else if (el.dataset.docUpload) {
-    const c = me(), type = el.dataset.docUpload;
-    const before = { ...c.docs[type] };
-    c.docs[type] = { status: "en_attente", file: images[0], specimen: false, day: 0, reason: "" };
-    if (!saveOrUndo(() => { c.docs[type] = before; })) { render(); return; }
-    render();
-    toast(`${DOC_TYPES[type].label} envoyé. L'agence le vérifie sous 24 h.`);
+    const type = el.dataset.docUpload;
+    act(`documents/${type}`, { image: images[0] }, { message: `${DOC_TYPES[type].label} envoyé. L'agence le vérifie sous 24 h.` });
   }
 });
 
@@ -228,4 +207,17 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && layer.innerHTML) closePanel();
 });
 
-render();
+/* =========================================================
+   Démarrage : marque, session en cours, puis premier affichage
+   ========================================================= */
+async function boot() {
+  try {
+    setBrand((await api("brand")).brand);
+    const { user } = await api("me");
+    if (user) { setSession(user); await reload(); }
+  } catch (e) {
+    serverError = e.message;
+  }
+  render();
+}
+boot();
