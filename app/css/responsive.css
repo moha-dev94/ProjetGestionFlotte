@@ -1,0 +1,48 @@
+/* ---------- Écrans moyens et mobiles ---------- */
+@media (max-width: 1100px) {
+  .dash-grid, .review { grid-template-columns: minmax(0, 1fr); }
+  .search { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 900px) {
+  .login { grid-template-columns: minmax(0, 1fr); }
+  .login__art { padding: 24px 16px; border-right: 0; border-bottom: 1px solid var(--line); gap: 16px; }
+  .login__road { display: none; }
+  .ride { grid-template-columns: minmax(0, 1fr); }
+  .ride__img { min-height: 0; aspect-ratio: 5 / 3; height: auto; }
+}
+@media (max-width: 800px) {
+  .app { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; }
+  .side { grid-row: 2; flex-direction: row; padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px)); border-right: 0; border-top: 1px solid var(--line); }
+  .brand, .side__foot { display: none; }
+  .nav { flex-direction: row; flex: 1; overflow-x: auto; }
+  .nav__item { flex: 1 0 74px; flex-direction: column; gap: 3px; padding: 6px 4px; font-size: 11px; align-items: center; text-align: center; line-height: 1.15; }
+  .nav__item[aria-current="page"]::before { left: 20%; right: 20%; top: -6px; bottom: auto; width: auto; height: 3px; }
+  .nav__count { position: absolute; top: 0; right: 10%; min-width: 18px; font-size: 10px; }
+  .top { padding: 12px 16px; }
+  .top__title { font-size: 28px; }
+  .top__actions { margin-left: 0; width: 100%; }
+  .user { margin-left: auto; }
+  .view { padding: 16px 16px 32px; }
+  .field-inline { margin-left: 0; width: 100%; }
+  .field-inline > * { flex: 1; }
+  .gantt { --label: 128px; --w: 50px; }
+  .form { grid-template-columns: minmax(0, 1fr); }
+  .kpi__value { font-size: 36px; }
+  .kpi--hero .kpi__value { font-size: 44px; }
+  .doc--lg { grid-template-columns: minmax(0, 1fr); }
+  .doc__thumb { max-width: 320px; }
+  .req { grid-template-columns: 88px minmax(0, 1fr); }
+  .req > :last-child { grid-column: 1 / -1; }
+  .ride__model { font-size: 34px; }
+  .countdown b { font-size: 40px; }
+  .countdown > div { min-width: 60px; }
+}
+@media (max-width: 520px) {
+  .search { grid-template-columns: minmax(0, 1fr); }
+  .doc { grid-template-columns: 96px minmax(0, 1fr); }
+  .demo-tag, .user__role { display: none; }
+  .steps li { font-size: 11px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}

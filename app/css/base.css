@@ -1,0 +1,54 @@
+/* Mise en page : cockpit. Rail de navigation à gauche, piste de contenu à droite,
+   l'état de chaque véhicule, réservation et document codé par une couleur constante. */
+:root {
+  --bg: #0b0b10;
+  --panel: #13131b;
+  --panel-2: #1a1a25;
+  --line: #272736;
+  --fg: #ececf2;
+  --muted: #9a9aae;
+  --dim: #64647c;
+  --accent: #e3061b;        /* feux arrière : marque, actions principales */
+  --accent-dark: #9c0011;
+  --headlight: #ffd60a;     /* phares : focus, aujourd'hui */
+
+  /* Couleurs de statut (sémantiques, indépendantes de l'accent) */
+  --ok: #2ee59d;
+  --res: #ffd60a;
+  --loc: #4da3ff;
+  --maint: #ff8a3d;
+  --hs: #8a8a9e;
+  --late: #ff3d6e;
+  --wait: #c08bff;
+
+  --f-display: "Bebas Neue", "Arial Narrow", sans-serif;
+  --f-ui: "Barlow", "Segoe UI", system-ui, sans-serif;
+  --f-plate: "Barlow Semi Condensed", "Arial Narrow", sans-serif;
+  --f-jp: "Noto Sans JP", "Yu Gothic", sans-serif;
+
+  --skew: -8deg;
+  --r: 6px;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--f-ui);
+  font-size: 15px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+#app { height: 100%; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--headlight); outline-offset: 2px; }
+h1, h2, h3 { margin: 0; font-weight: 400; text-wrap: balance; }
+p { margin: 0; }
+img { max-width: 100%; }
+.num { font-variant-numeric: tabular-nums; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }
+.muted { color: var(--muted); }

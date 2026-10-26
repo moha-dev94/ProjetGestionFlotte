@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Touge Fleet Console</title>
+
+  <!-- Polices -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@600;700&family=Bebas+Neue&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@900&text=%E5%B3%A0&display=swap">
+
+  <!-- Styles : variables → mise en page → composants → vues → fenêtres → mobile -->
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/views.css">
+  <link rel="stylesheet" href="css/panels.css">
+  <link rel="stylesheet" href="css/responsive.css">
+
+  <!-- Scripts : l'ordre compte (constantes et données d'abord, événements en dernier) -->
+  <script src="js/config.js" defer></script>
+  <script src="js/format.js" defer></script>
+  <script src="js/data.js" defer></script>
+  <script src="js/rules.js" defer></script>
+  <script src="js/images.js" defer></script>
+  <script src="js/components.js" defer></script>
+  <script src="js/views-agence.js" defer></script>
+  <script src="js/views-client.js" defer></script>
+  <script src="js/panels.js" defer></script>
+  <script src="js/app.js" defer></script>
+  <script src="js/events.js" defer></script>
+</head>
+<body>
+  <!-- Toute l'interface est générée par js/app.js -->
+  <div id="app"></div>
+  <div id="layer"></div>
+  <div id="toast-slot" aria-live="polite"></div>
+</body>
+</html>
